@@ -26,7 +26,9 @@ int main(int, char**)
     // pKNN = createBackgroundSubtractorKNN();
 
     RNG rng(12345);
-    int minBoundingArea = 100;
+    int minBoundingArea = 500;
+    int dilationIteration = 4;
+    int numLimitBounding = 50;
 
     for(;;)  
     {  
@@ -54,24 +56,35 @@ int main(int, char**)
         imshow("FG Mask MOG 2", fgMaskMOG2);
         // imshow("FG Mask KNN", fgMaskKNN);
 
+        Mat imgErosion, imgDilation;
+        erode(fgMaskMOG2, imgErosion, Mat());
+        imshow("erosion", imgErosion);
+        dilate(imgErosion, imgDilation, Mat(), Point(-1,-1), dilationIteration);
+        imshow("dilation", imgDilation);
+
         // show contour rectangles
         vector<vector<Point> > contours;
         vector<Vec4i> hierarchy;
-        findContours( fgMaskMOG2, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
-
-        for( int i = 0; i< contours.size(); i++ )
+        findContours( imgDilation, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+        int numContours = contours.size();
+        cout << "bounding box number: " << numContours << endl;
+        if (numContours < numLimitBounding)
         {
-            if (contourArea(contours[i]) > minBoundingArea)
+            for( int i = 0; i < numContours; i++ )
             {
-                Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-                Rect boundRect = boundingRect(contours[i]);
-                rectangle( frame, Point(boundRect.x, boundRect.y), Point(boundRect.x + boundRect.width, boundRect.y + boundRect.height), color, 2, 8, 0 );
+                if (contourArea(contours[i]) > minBoundingArea)
+                {
+                    Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+                    Rect boundRect = boundingRect(contours[i]);
+                    rectangle( frame, Point(boundRect.x, boundRect.y), Point(boundRect.x + boundRect.width, boundRect.y + boundRect.height), color, 2, 8, 0 );
+                }
             }
         }
+
         imshow( "Contours", frame );
 
         //get the input from the keyboard
-        char keyboard = waitKey( 20 );
+        char keyboard = waitKey( 10 );
   
         
         if(keyboard == 27)
