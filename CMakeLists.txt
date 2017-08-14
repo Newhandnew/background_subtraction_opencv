@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project(backgroundsubtract)
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+add_executable(backgroundsubtract backgroundsubtract.cpp)
+target_Link_Libraries(backgroundsubtract ${OpenCV_LIBS})
