@@ -45,7 +45,9 @@ int main(int argc, char** argv)
     RNG rng(12345);
     int minBoundingArea = 300;
     int dilationIteration = 3;
-    int numLimitBounding = 200;
+    int numLimitBounding = 100;
+
+    Mat imgBoundingBox;
 
     for(;;)  
     {  
@@ -78,6 +80,13 @@ int main(int argc, char** argv)
         imshow("erosion", imgErosion);
         dilate(imgErosion, imgDilation, Mat(), Point(-1,-1), dilationIteration);
         imshow("dilation", imgDilation);
+        cout << imgDilation.type() << endl;
+
+        Mat imgProposed;
+        Mat imgRed(frame.size(), frame.type(), Scalar(0, 0, 255));
+        imgRed.copyTo(imgProposed, imgDilation);
+        addWeighted(frame , 0.8, imgProposed, 0.3, 0, imgProposed, 0);
+        imshow("Proposed", imgProposed);
 
         // show contour rectangles
         vector<vector<Point> > contours;
@@ -85,6 +94,7 @@ int main(int argc, char** argv)
         findContours( imgDilation, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
         int numContours = contours.size();
         cout << "bounding box number: " << numContours << endl;
+        frame.copyTo(imgBoundingBox);
         if (numContours < numLimitBounding)
         {
             for( int i = 0; i < numContours; i++ )
@@ -93,12 +103,12 @@ int main(int argc, char** argv)
                 {
                     Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
                     Rect boundRect = boundingRect(contours[i]);
-                    rectangle( frame, Point(boundRect.x, boundRect.y), Point(boundRect.x + boundRect.width, boundRect.y + boundRect.height), Scalar(255,0,0), 2, 8, 0 );
+                    rectangle( imgBoundingBox, Point(boundRect.x, boundRect.y), Point(boundRect.x + boundRect.width, boundRect.y + boundRect.height), Scalar(255,0,0), 2, 8, 0 );
                 }
             }
         }
 
-        imshow( "Contours", frame );
+        imshow("Bounding Box", imgBoundingBox );
 
         t = (double)getTickCount() - t;
         costTime = t / (double)getTickFrequency() * 1000;
