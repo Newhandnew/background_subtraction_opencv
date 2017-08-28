@@ -38,14 +38,18 @@ int main(int argc, char** argv)
     pMOG2 = createBackgroundSubtractorMOG2(); //MOG2 approach
     pKNN = createBackgroundSubtractorKNN();
 
+    double costTime;
+    int perFrameTime = 30;
+    char keyboard;
+
     RNG rng(12345);
-    int minBoundingArea = 400;
+    int minBoundingArea = 300;
     int dilationIteration = 3;
     int numLimitBounding = 200;
 
     for(;;)  
     {  
-        double t = (double)cvGetTickCount();  
+        double t = (double)getTickCount();  
   
         cap >> frame;  
         if(frame.empty())
@@ -96,19 +100,23 @@ int main(int argc, char** argv)
 
         imshow( "Contours", frame );
 
-        //get the input from the keyboard
-        char keyboard = waitKey( 10 );
-  
-        
+        t = (double)getTickCount() - t;
+        costTime = t / (double)getTickFrequency() * 1000;
+        cout << "cost time: " << costTime << endl;
+        if (costTime < perFrameTime)
+        {
+            keyboard = waitKey(1 + perFrameTime - costTime);
+        }
+        else
+        {
+            keyboard = waitKey(1);
+            cout << "in > 30" << endl;
+        }
         if(keyboard == 27)
         {
             cout <<"exit" << endl;
             break;
         }
-
-  
-        t = (double)cvGetTickCount() - t;  
-        cout << "cost time: " << t / ((double)cvGetTickFrequency()*1000.) << endl;  
     }  
     return 0;  
 }  
