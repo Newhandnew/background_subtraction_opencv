@@ -93,7 +93,7 @@ int main(int argc, char** argv)
                 {
                     Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
                     Rect boundRect = boundingRect(contours[i]);
-                    rectangle( frame, Point(boundRect.x, boundRect.y), Point(boundRect.x + boundRect.width, boundRect.y + boundRect.height), color, 2, 8, 0 );
+                    rectangle( frame, Point(boundRect.x, boundRect.y), Point(boundRect.x + boundRect.width, boundRect.y + boundRect.height), Scalar(255,0,0), 2, 8, 0 );
                 }
             }
         }
